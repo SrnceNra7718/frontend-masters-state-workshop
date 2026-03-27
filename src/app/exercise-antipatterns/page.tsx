@@ -454,15 +454,21 @@ function FlightSearch() {
   const [searchResults, setSearchResults] = useState<
     Array<{ id: number; flight: string; price: number }>
   >([]);
-  const [searchCount, setSearchCount] = useState(0); // ❌ Should use useRef
-  const [lastSearchTime, setLastSearchTime] = useState<number | null>(null); // ❌ Should use useRef
+  // const [searchCount, setSearchCount] = useState(0); // ❌ Should use useRef
+  const searchCountRef = useRef<number>(0); // ✅ Using useRef to track search count
+
+  // const [lastSearchTime, setLastSearchTime] = useState<number | null>(null); // ❌ Should use useRef
+  const lastSearchTimeRef = useRef<number | null>(null); // ✅ Using useRef to track last search time
 
   const handleSearch = async () => {
     const now = Date.now();
 
     // Track search analytics (doesn't affect UI)
-    setSearchCount((prev) => prev + 1); // ❌ Unnecessary re-render
-    setLastSearchTime(now); // ❌ Unnecessary re-render
+    // setSearchCount((prev) => prev + 1); // ❌ Unnecessary re-render
+    searchCountRef.current = searchCountRef.current + 1; // ✅ Using useRef to track search count
+
+    // setLastSearchTime(now); // ❌ Unnecessary re-render
+    lastSearchTimeRef.current = now; // ✅ Using useRef to track last search time
 
     // Simulate API call
     setTimeout(() => {
@@ -472,8 +478,13 @@ function FlightSearch() {
       ]);
     }, 1000);
 
+    // // Analytics logic that doesn't need to trigger re-renders
+    // if (lastSearchTime && now - lastSearchTime < 1000) {
+    //   console.log("User is searching too quickly");
+    // }
+
     // Analytics logic that doesn't need to trigger re-renders
-    if (lastSearchTime && now - lastSearchTime < 1000) {
+    if (lastSearchTimeRef.current && now - lastSearchTimeRef.current < 1000) {
       console.log("User is searching too quickly");
     }
   };
@@ -513,8 +524,13 @@ function FlightSearch() {
           </div>
         )}
 
-        <div className="text-xs text-muted-foreground border-t pt-2">
+        {/* <div className="text-xs text-muted-foreground border-t pt-2">
           Debug: Search count: {searchCount}, Last search: {lastSearchTime}
+        </div> */}
+
+        <div className="text-xs text-muted-foreground border-t pt-2">
+          Debug: Search count: {searchCountRef.current}, Last search:{" "}
+          {lastSearchTimeRef.current}
         </div>
       </CardContent>
     </Card>
